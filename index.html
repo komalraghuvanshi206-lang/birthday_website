@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Birthday Surprise - Mikku</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<audio id="audio" src="./song.mp3" preload="auto" crossorigin="anonymous"></audio>
+
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    
+    const musicInd = document.getElementById('musicInd');
+   
+    document.getElementById('playBtn')?.addEventListener('click', async () => {
+      const audio = document.getElementById('audio');
+      if (!audio) return console.warn('audio element not found');
+      try {
+        await audio.play();
+        musicInd && musicInd.classList.add('on');
+        heartsSpeed = 1.6;
+        placeHearts(24);
+        setTimeout(() => show(6), 1200);
+      } catch (err) {
+        console.error('audio.play() failed', err);
+        
+        audio.controls = true;
+      }
+    });
+
+    document.getElementById('pauseBtn')?.addEventListener('click', () => {
+      const audio = document.getElementById('audio');
+      if (audio) {
+        audio.pause();
+        audio.currentTime = 0; // reset to start
+      }
+      musicInd && musicInd.classList.remove('on');
+      heartsSpeed = 1;
+      placeHearts(18);
+    });
+
+    
+  } catch (err) {
+    
+  }
+});
+</script>
+
+<style>
+:root{
+  --bg1-1:#1a1425;
+  --bg1-2:#2b1a3a;
+  --glass: rgba(255,255,255,0.08);
+  --glass-border: rgba(255,255,255,0.12);
+  --neon: #ff66a6;
+  --neon-weak: #ffb6d9;
+  --accent:#ffd166;
+  --soft:#fff7ff;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1-1),var(--bg1-2));font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto;color:var(--soft);overflow:hidden}
+.stage{position:relative;width:100%;height:100vh;display:flex;align-items:center;justify-content:center}
+.hearts{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.heart{
+  position:absolute;width:28px;height:28px;background:radial-gradient(circle at 35% 35%,var(--neon-weak),var(--neon));
+  transform:rotate(-45deg);
+  border-radius:8px 8px 2px 2px;
+  filter:blur(0.6px);
+  opacity:0.85;
+  animation:drift linear infinite;
+}
+.heart::after{content:"";position:absolute;left:6px;top:2px;width:16px;height:16px;background:inherit;border-radius:50% 50% 50% 50%}
+@keyframes drift{
+  0%{transform:translateY(20vh) scale(0.9) rotate(-30deg); opacity:0}
+  10%{opacity:0.9}
+  100%{transform:translateY(-120vh) scale(1.05) rotate(30deg); opacity:0}
+}
+.slide{
+  position:absolute; width:min(860px,93vw); max-width:1000px; padding:32px; border-radius:18px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border:1px solid var(--glass-border); box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:12px;
+  transform:translateY(10px); opacity:0; pointer-events:none; transition:opacity .6s ease, transform .6s ease;
+  z-index:50;
+}
+.slide.active{opacity:1; transform:translateY(0); pointer-events:auto}
+h1{margin:0;font-family:"Playfair Display",serif;font-weight:700;color:var(--neon); text-shadow:0 6px 28px rgba(255,102,166,0.12); font-size:clamp(28px,4.8vw,56px)}
+.kicker{font-size:clamp(14px,2.6vw,20px); color:rgba(255,255,255,0.85); font-weight:600}
+.btns{display:flex;gap:12px;margin-top:8px}
+button{cursor:pointer;padding:12px 18px;border-radius:12px;border:none;font-weight:700;font-size:16px;box-shadow:0 10px 30px rgba(0,0,0,0.35)}
+.btn-yes{background:linear-gradient(90deg,var(--neon),#ff9acb);color:#120612}
+.btn-no{background:#2f2e3a;color:#ddd}
+.top-button{position:fixed;left:50%;transform:translateX(-50%);top:16vh;padding:12px 28px;border-radius:999px;font-size:18px;background:linear-gradient(90deg,var(--neon),#ff9acb);color:#120612;box-shadow:0 24px 60px rgba(255,102,166,0.12);border:1px solid rgba(255,255,255,0.04);z-index:55}
+.progress{position:fixed;left:0;top:0;height:3px;background:linear-gradient(90deg,var(--neon),var(--accent));width:0;transition:width .3s linear;z-index:60}
+.theme-bright{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .8s ease;background:radial-gradient(800px 600px at 50% 30%, rgba(255,230,240,0.08), rgba(255,235,210,0.02));z-index:35}
+.theme-bright.on{opacity:1}
+.theme-dark {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+  z-index: 40;
+}
+.theme-dark.on { opacity: 1; }
+
+.music-ind{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(0,0,0,0.4);padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .3s;z-index:45}
+.music-ind.on{opacity:1}
+.banner{position:fixed;left:50%;transform:translateX(-50%) translateY(-200%);top:6vh;background:linear-gradient(90deg,#fff,#ffd8f0);color:#2a0a20;padding:12px 28px;border-radius:999px;font-weight:800;letter-spacing:3px;box-shadow:0 30px 80px rgba(255,150,200,0.12);z-index:52;transition:transform .8s cubic-bezier(.18,.9,.2,1)}
+.banner.show{transform:translateX(-50%) translateY(0)}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:51}
+.confetti i{position:absolute;width:10px;height:16px;border-radius:2px;opacity:0.95;transform-origin:center;animation:fall linear forwards}
+@keyframes fall{0%{transform:translateY(-10vh) rotate(0)}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+.balloons{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:48}
+.balloon{position:absolute;bottom:-140px;width:56px;height:72px;border-radius:50% 50% 46% 46%;box-shadow:0 16px 36px rgba(0,0,0,0.25);display:flex;align-items:flex-end;justify-content:center}
+.balloon::after{content:'';position:absolute;bottom:-26px;left:50%;width:2px;height:28px;background:#e9e9e9;transform:translateX(-50%)}
+@keyframes floatUp{0%{transform:translateY(0)}100%{transform:translateY(-120vh)}}
+.cake-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+.cake{width:260px;height:160px;border-radius:18px;background:linear-gradient(180deg,#ffdfe9,#ff9bc1);position:relative;box-shadow:0 30px 80px rgba(255,105,165,0.12);transform:translateY(18px);opacity:0;transition:transform .6s ease,opacity .6s ease}
+.cake.show{opacity:1;transform:translateY(0)}
+.candle{position:absolute;left:50%;transform:translateX(-50%);top:18px;width:12px;height:44px;background:#fff;border-radius:8px}
+.flame{position:absolute;left:50%;transform:translateX(-50%);top:-18px;width:14px;height:22px;background:radial-gradient(circle at 35% 30%,#fff2a8,#ffd166 55%,#ff8c42);border-radius:50% 50% 55% 55%;box-shadow:0 0 18px 6px rgba(255,181,72,.6);animation:flicker .28s infinite alternate}
+@keyframes flicker{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.07)}}
+.slice{position:absolute;right:-12px;bottom:6px;width:70px;height:90px;background:linear-gradient(180deg,#ffe1e9,#ff9bb2);border-radius:8px;transform-origin:left center;transition:transform .9s cubic-bezier(.2,.9,.2,1)}
+.message-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,8,12,0.72);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .4s;z-index:70}
+.message-modal.show{opacity:1;pointer-events:auto}
+.msg-card{width:min(720px,92vw);background:#0c0d12;padding:20px;border-radius:14px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 30px 80px rgba(0,0,0,0.6)}
+.small{padding:8px 12px;border-radius:8px;background:#2f2f3a;border:none;color:#fff;font-weight:600;cursor:pointer;font-size:14px}
+.hidden{display:none}
+
+.cake {
+  width: 260px;
+  height: 160px;
+  border-radius: 18px;
+  background: linear-gradient(180deg,#ffdfe9,#ff9bc1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 -8px 20px rgba(255,255,255,0.2);
+  position: relative;
+  transform: translateY(18px);
+  opacity: 0;
+  transition: transform .6s ease, opacity .6s ease;
+}
+
+.cake.show { opacity: 1; transform: translateY(0); }
+
+
+.candle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 10px; /* upar thoda adjust kiya */
+  width: 14px;
+  height: 44px;
+  background: #fff;
+  border-radius: 7px;
+  z-index: 5;
+}
+
+.flame {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) scale(1);
+  top: -16px;
+  width: 14px;
+  height: 22px;
+  background: radial-gradient(circle at 35% 30%, #fff2a8, #ffd166 55%, #ff8c42);
+  border-radius: 50% 50% 55% 55%;
+  box-shadow: 0 0 18px 6px rgba(255,181,72,.6);
+  animation: flicker .28s infinite alternate;
+}
+
+.slice {
+  position: absolute;
+  left: 50%;       /* cake ke center se start */
+  bottom: 10px;
+  width: 70px;
+  height: 90px;
+  background: linear-gradient(180deg,#ffe1e9,#ff9bb2);
+  border-radius: 8px;
+  transform-origin: top left;  /* pivot point slice ke upar-left corner par */
+  transition: transform 1s cubic-bezier(.55,.055,.675,.19); /* smooth curve */
+  z-index: 10;
+}
+
+
+
+
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="stage">
+  <div class="hearts" id="hearts"></div>
+
+  <section class="slide active" id="s1">
+    <h1>It's your special day yehhh!</h1>
+  </section>
+
+  <section class="slide" id="s2">
+    <h1>To make something special for you.......are special to me</h1>
+  </section>
+
+  <section class="slide" id="s3">
+    <h1>Do you wanna see what I made??</h1>
+    <div class="btns">
+      <button class="btn-yes" id="yesBtn">YES</button>
+      <button class="btn-no" id="noBtn">NO</button>
+    </div>
+  </section>
+
+  <section class="slide" id="s4">
+    <h1>Have a look at it, motiiiiiiiii jiiiiiii</h1>
+    <div class="kicker">Ready for magic?</div>
+  </section>
+
+  <section class="slide" id="s5">
+    <button class="top-button" id="lightsBtn">LIGHTS ON</button>
+  </section>
+
+  <section class="slide" id="s6">
+    <h1>Play Music</h1>
+    <div class="btns">
+      <button class="btn-yes" id="playBtn">PLAY</button>
+      <button class="btn-no" id="pauseBtn">PAUSE</button>
+    </div>
+  </section>
+
+  <section class="slide" id="s7">
+    <h1>Decorate</h1>
+    <div class="btns">
+      <button class="small" id="decorateBtn">DECORATE</button>
+    </div>
+  </section>
+
+  <section class="slide" id="s8">
+    <h1>Fly Balloons</h1>
+    <div class="btns">
+      <button class="small" id="balloonBtn">FLY BALLOONS</button>
+    </div>
+  </section>
+
+  <section class="slide" id="s9">
+    <div class="cake-wrap">
+      <div class="cake" id="cake">
+        <div class="candle"><div class="flame" id="flame"></div></div>
+        <div class="cake-top"></div>
+        <div class="cake-msg">Happy Birthday</div>
+        <div class="slice" id="slice"></div>
+      </div>
+      <div class="btns">
+        <button class="small" id="blowBtn">BLOW CANDLES</button>
+        <button class="small hidden" id="cutBtn">CUT CAKE</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="s10">
+    <h1>Well, I have a msg for u, Mikku</h1>
+    <div class="kicker">Tap to read</div>
+    <div class="btns">
+      <button class="btn-yes" id="openMsg">OPEN MESSAGE</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="theme-dark" id="themeDark"></div>
+<div class="banner" id="banner">🎉 HAPPY BIRTHDAY MIKKU 🎉</div>
+<div class="theme-bright" id="themeBright"></div>
+<div class="confetti" id="confetti"></div>
+<div class="balloons" id="balloons"></div>
+<div class="music-ind" id="musicInd">Music: On</div>
+
+<div class="message-modal" id="msgModal">
+  <div class="msg-card">
+    <h2 style="margin:0 0 8px;font-family:'Playfair Display',serif;color:var(--neon)">From Komal to Mikku</h2>
+    <p style="margin:0 0 8px;color:rgba(255,255,255,0.9)">Wishing you a very happy birthday! 🥳
+Aap kehte ho ki sab dur se aapke liye pyar kam ho gaya hai, lekin meri side se bilkul bhi nahi! 💖
+Main chahti hoon aapko best se bhi best khushi mile aaj aur hamesha!
+That's why 4-5 days laga kr aapke liye ye bnaya he, u like it naaaaaaa?
+Luv uuuuu muahhh 😘.</p>
+    
+    <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="small" id="closeMsg">CLOSE</button></div>
+  </div>
+</div>
+
+
+<div id="ytWrap" style="position:fixed;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+  <iframe id="ytPlayer" src="" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+</div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    const slides = [...document.querySelectorAll('.slide')];
+    if (!slides.length) throw new Error('No .slide elements found');
+
+    const heartsWrap = document.getElementById('hearts');
+    const progress = document.getElementById('progress');
+    const themeDark = document.getElementById('themeDark');
+    const themeBright = document.getElementById('themeBright');
+    const lightsBtn = document.getElementById('lightsBtn');
+    const banner = document.getElementById('banner');
+    const confetti = document.getElementById('confetti');
+    const balloonsWrap = document.getElementById('balloons');
+    const musicInd = document.getElementById('musicInd');
+
+    
+const audio = document.getElementById('audio');
+
+document.getElementById('playBtn')?.addEventListener('click', async () => {
+  if (!audio) return console.warn('audio element not found');
+  try {
+    await audio.play(); 
+    musicInd && musicInd.classList.add('on');
+    heartsSpeed = 1.6;
+    placeHearts(24);
+    setTimeout(() => show(6), 1200);
+  } catch (err) {
+    console.error('audio.play() failed', err);
+    audio.controls = true; 
+  }
+});
+
+document.getElementById('pauseBtn')?.addEventListener('click', () => {
+  if (audio) {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+  musicInd && musicInd.classList.remove('on');
+  heartsSpeed = 1;
+  placeHearts(18);
+});
+
+
+    let idx = 0;
+    let heartsSpeed = 1;
+    let balloonsActive = false;
+    let balloonsInterval = null;
+
+    function show(i){
+      i = Math.max(0, Math.min(i, slides.length - 1));
+      slides.forEach(s => s.classList.remove('active'));
+      slides[i].classList.add('active');
+      idx = i;
+      if (progress) progress.style.width = ((i + 1) / slides.length * 100) + '%';
+      if(i === 4){
+        themeDark && themeDark.classList.add('on');
+      } else {
+        themeDark && themeDark.classList.remove('on');
+      }
+    }
+
+    function placeHearts(count = 16){
+      if (!heartsWrap) return;
+      heartsWrap.innerHTML = '';
+      for(let i = 0; i < count; i++){
+        const h = document.createElement('div');
+        h.className = 'heart';
+        const size = 14 + Math.random() * 36;
+        h.style.width = size + 'px';
+        h.style.height = size + 'px';
+        h.style.left = (Math.random() * 100) + 'vw';
+        h.style.top = (Math.random() * 100) + 'vh';
+        h.style.animationDuration = (6 + Math.random() * 10) / heartsSpeed + 's';
+        h.style.opacity = (0.25 + Math.random() * 0.7);
+        heartsWrap.appendChild(h);
+      }
+    }
+
+    placeHearts(18);
+    show(0);
+
+    setTimeout(() => show(1), 5000);
+    setTimeout(() => show(2), 10000);
+
+    document.getElementById('yesBtn')?.addEventListener('click', () => {
+      show(3);
+      setTimeout(() => show(4), 5000);
+    });
+
+    document.getElementById('noBtn')?.addEventListener('click', () => {
+      const el = document.createElement('div');
+      el.style.position = 'fixed';
+      el.style.top = '12%';
+      el.style.left = '50%';
+      el.style.transform = 'translateX(-50%)';
+      el.style.padding = '10px 14px';
+      el.style.background = 'rgba(255,255,255,0.06)';
+      el.style.border = '1px solid rgba(255,255,255,0.06)';
+      el.style.borderRadius = '10px';
+      el.style.fontWeight = '700';
+      el.style.color = 'var(--neon)';
+      el.style.zIndex = '9999';
+      el.innerText = 'Arey no kyu? yesssss kro!';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2400);
+    });
+
+    lightsBtn?.addEventListener('click', () => {
+      themeBright && themeBright.classList.add('on');
+      themeDark && themeDark.classList.remove('on');
+      setTimeout(() => show(5), 600);
+    });
+
+    
+    document.getElementById('playBtn')?.addEventListener('click', () => {
+      if (!ytPlayer) { console.warn('ytPlayer missing'); return; }
+      
+      ytPlayer.src = `https://www.youtube.com/embed/${YT_ID}?autoplay=1&controls=1&rel=0&playsinline=1`;
+      musicInd && musicInd.classList.add('on');
+      heartsSpeed = 1.6;
+      placeHearts(24);
+      setTimeout(() => show(6), 1200);
+    });
+
+    
+    document.getElementById('pauseBtn')?.addEventListener('click', () => {
+      if (ytPlayer) ytPlayer.src = '';
+      musicInd && musicInd.classList.remove('on');
+      heartsSpeed = 1;
+      placeHearts(18);
+    });
+
+    document.getElementById('decorateBtn')?.addEventListener('click', () => {
+      banner && banner.classList.add('show');
+      setTimeout(() => spawnConfetti(60), 300);
+      setTimeout(() => show(7), 1400);
+    });
+
+    function spawnConfetti(n){
+      if (!confetti) return;
+      for(let i = 0; i < n; i++){
+        const el = document.createElement('i');
+        el.style.left = (Math.random() * 100) + 'vw';
+        el.style.background = ['#ff66a6', '#ffd166', '#79ffe1', '#a78bfa'][i % 4];
+        el.style.animationDuration = (1.4 + Math.random() * 1.6) + 's';
+        el.style.top = (-20 - Math.random() * 40) + 'px';
+        confetti.appendChild(el);
+        setTimeout(() => el.remove(), 3000);
+      }
+    }
+
+    document.getElementById('balloonBtn')?.addEventListener('click', () => {
+    startBalloons();
+    setTimeout(() => {
+    show(8);
+    const cake = document.getElementById('cake');
+    cake?.classList.add('show');
+    }, 800);
+    });
+
+
+    function startBalloons(){
+      if(balloonsActive) return;
+      balloonsActive = true;
+      balloonsInterval = setInterval(() => createBalloon(), 550);
+      setTimeout(() => { balloonsActive = false; clearInterval(balloonsInterval); }, 9000);
+    }
+
+    function createBalloon(){
+      if (!balloonsWrap) return;
+      const b = document.createElement('div');
+      b.className = 'balloon';
+      b.style.left = Math.random() * 90 + 'vw';
+      const c = ['#ff66a6', '#ffd166', '#79ffe1', '#a78bfa', '#fca5a5', '#86efac'][Math.floor(Math.random() * 6)];
+      b.style.background = c;
+      b.style.animation = `floatUp ${6 + Math.random() * 4}s linear forwards`;
+      balloonsWrap.appendChild(b);
+      setTimeout(() => b.remove(), 11000);
+    }
+
+   document.getElementById('blowBtn')?.addEventListener('click', () => {
+  const flame = document.getElementById('flame');
+  if(flame){
+    flame.style.transition = 'opacity 1.2s linear, transform 1.2s linear';
+    flame.style.opacity = 0;
+    flame.style.transform = 'translateX(-50%) scale(0.2)';
+    setTimeout(() => document.getElementById('cutBtn')?.classList.remove('hidden'), 1200);
+  }
+});
+
+
+   document.getElementById('cutBtn')?.addEventListener('click', () => {
+  const slice = document.getElementById('slice');
+  if(!slice) return;
+
+  // Slice ko thoda right aur rotate karke realistic cut effect
+  slice.style.transform = 'translateX(60px) rotate(-20deg) rotateZ(-5deg)';
+
+  // Thoda delay ke baad next slide ya message show
+  setTimeout(() => show(10), 1200);
+});
+
+
+
+    document.getElementById('openMsg')?.addEventListener('click', () => { 
+      document.getElementById('msgModal')?.classList.add('show');
+    });
+
+    document.getElementById('closeMsg')?.addEventListener('click', () => { 
+      document.getElementById('msgModal')?.classList.remove('show');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowRight') show(Math.min(idx + 1, slides.length - 1));
+      if(e.key === 'ArrowLeft') show(Math.max(idx - 1, 0));
+    });
+
+  } catch (err) {
+    console.error(err);
+    document.body.innerHTML = '';
+    const pre = document.createElement('pre');
+    pre.style.whiteSpace = 'pre-wrap';
+    pre.style.color = '#fff';
+    pre.style.background = '#900';
+    pre.style.padding = '18px';
+    pre.style.margin = '20px';
+    pre.style.borderRadius = '8px';
+    pre.textContent = 'JS error: ' + (err && err.stack ? err.stack : String(err));
+    document.body.appendChild(pre);
+  }
+});
+</script>
+
+</body>
+</html>
